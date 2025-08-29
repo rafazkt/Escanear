@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Identificador de Plantas 🌱</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #0a0a0a;
+      color: #00ff88;
+      text-align: center;
+      padding: 30px;
+    }
+    h1 {
+      text-shadow: 0 0 8px #00ff88;
+    }
+    input, button {
+      margin: 10px;
+      padding: 10px;
+      border-radius: 10px;
+      border: 2px solid #00ff88;
+      background: black;
+      color: #00ff88;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #00ff88;
+      color: black;
+    }
+    #resultado {
+      margin-top: 20px;
+      padding: 15px;
+      border: 1px solid #00ff88;
+      border-radius: 12px;
+      background: #111;
+    }
+  </style>
+</head>
+<body>
+  <h1>🌱 Identificador de Plantas</h1>
+  <p>Sube una foto de tu planta:</p>
+  <input type="file" id="imagen" accept="image/*">
+  <button onclick="identificar()">Identificar Planta</button>
+  
+  <div id="resultado">Aquí aparecerá el resultado...</div>
+
+  <script>
+    async function identificar() {
+      const fileInput = document.getElementById('imagen');
+      if (!fileInput.files.length) {
+        alert("Por favor selecciona una imagen.");
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onloadend = async () => {
+        const base64 = reader.result.replace(/^data:.+;base64,/, "");
+
+        document.getElementById("resultado").innerHTML = "🔍 Analizando imagen...";
+
+        try {
+          const res = await fetch("https://api.plant.id/v3/identification", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "Api-Key": "AQUI_VA_TU_API_KEY"  // 🔑 pon tu API KEY de plant.id
+            },
+            body: JSON.stringify({
+              images: [base64],
+              similar_images: true
+            })
+          });
+
+          const data = await res.json();
+          if (data.suggestions && data.suggestions.length > 0) {
+            const planta = data.suggestions[0].plant_name;
+            const prob = (data.suggestions[0].probability * 100).toFixed(2);
+            document.getElementById("resultado").innerHTML =
+              `<b>Planta detectada:</b> ${planta}<br>
+               <b>Confianza:</b> ${prob}%`;
+          } else {
+            document.getElementById("resultado").innerHTML = "❌ No se pudo identificar.";
+          }
+        } catch (err) {
+          console.error(err);
+          document.getElementById("resultado").innerHTML = "⚠️ Error en la conexión.";
+        }
+      };
+      reader.readAsDataURL(fileInput.files[0]);
+    }
+  </script>
+</body>
+</html>
