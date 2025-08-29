@@ -2,35 +2,21 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Identificador de Plantas</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Identificador de Plantas - Naturalsheet</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <h1>🌱 Identificador de Plantas</h1>
-  <input type="file" id="fileInput">
-  <button onclick="enviarImagen()">Identificar</button>
-  <pre id="resultado"></pre>
+  <div class="container">
+    <h1>🌱 Naturalsheet - Identificador de Plantas</h1>
+    <p>Sube una foto de tu planta y descubre de qué especie se trata.</p>
+    
+    <input type="file" id="fileInput" accept="image/*">
+    <button onclick="identifyPlant()">🔍 Identificar Planta</button>
+    
+    <div id="result"></div>
+  </div>
 
-  <script>
-    async function enviarImagen() {
-      const fileInput = document.getElementById("fileInput");
-      const file = fileInput.files[0];
-      if (!file) return alert("Por favor selecciona una imagen");
-
-      const reader = new FileReader();
-      reader.onloadend = async function () {
-        const base64Image = reader.result.split(",")[1]; // solo el base64 puro
-
-        const response = await fetch("/.netlify/functions/plant", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ images: [base64Image] })
-        });
-
-        const data = await response.json();
-        document.getElementById("resultado").textContent = JSON.stringify(data, null, 2);
-      };
-      reader.readAsDataURL(file);
-    }
-  </script>
+  <script src="script.js"></script>
 </body>
 </html>
